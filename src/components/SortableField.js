@@ -3,14 +3,22 @@ import { useDrag, useDrop } from "react-dnd";
 
 const ItemType = "FORM_FIELD";
 
-const SortableField = ({ id, text, type, index, moveField, updateField }) => {
+const SortableField = ({ id, text, type, index, moveField, updateField, columns }) => {
   const ref = useRef(null);
-  const [columns, setColumns] = useState(12);
+  const [currentColumns, setCurrentColumns] = useState(columns);
   const [isEditing, setIsEditing] = useState(false);
   const [fieldText, setFieldText] = useState(text);
   const [fieldType, setFieldType] = useState(type);
 
-  const [, drop] = useDrop({
+  const [{ isDragging }, drag, dragPreview] = useDrag({
+    type: ItemType,
+    item: { id, index, updateField },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging()
+    })
+  });
+
+  const [{ isOver }, drop] = useDrop({
     accept: ItemType,
     hover(item) {
       if (!ref.current) return;
@@ -19,22 +27,15 @@ const SortableField = ({ id, text, type, index, moveField, updateField }) => {
       if (dragIndex === hoverIndex) return;
       moveField(dragIndex, hoverIndex);
       item.index = hoverIndex;
-    }
-  });
-
-  
-
-  const [{ isDragging }, drag] = useDrag({
-    type: ItemType,
-    item: { id, index },
+    },
     collect: (monitor) => ({
-      isDragging: monitor.isDragging()
+      isOver: monitor.isOver(),
+      canDrop: monitor.canDrop()
     })
   });
 
+  drag(drop(ref));
 
-
-  drag(drop(ref)); // Combine drag and drop refs
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -46,15 +47,13 @@ const SortableField = ({ id, text, type, index, moveField, updateField }) => {
       const newColumns = Math.round(
         (newWidth / ref.current.parentElement.offsetWidth) * 12
       );
-      setColumns(Math.min(newColumns, 12)); // Ensure column count stays within 1-12
+      setCurrentColumns(Math.min(newColumns, 12));
+      updateField(id, { columns: newColumns });
     };
 
     const handleMouseUp = () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
-
-      // Update the column count in the formFields state
-      updateField(id, { columns });
     };
 
     const handleMouseDown = (e) => {
@@ -73,32 +72,30 @@ const SortableField = ({ id, text, type, index, moveField, updateField }) => {
         resizeHandle.removeEventListener("mousedown", handleMouseDown);
       }
     };
-  }, [columns, id, updateField]);
-
-  
+  }, [id, updateField]);
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
     if (isEditing) {
       // Save changes when exiting edit mode
-      updateField(id, { text: fieldText, type: fieldType, columns  });
+      updateField(id, { text: fieldText, type: fieldType, columns: currentColumns });
     }
   };
-
 
   return (
     <div
       ref={ref}
       style={{
         opacity: isDragging ? 0.5 : 1,
-        gridColumn: `span ${columns}`,
+        gridColumn: `span ${currentColumns}`,
         border: "1px solid gray",
-        backgroundColor: "#ddd",
+        backgroundColor: isOver ? 'red' : 'white',
         padding: "10px",
         boxSizing: "border-box",
         margin: "10px 0",
         height: "min-content",
-        position: "relative" // Ensure resize handle is positioned correctly
+        position: "relative",
+        cursor: isOver ? 'no-drop' : 'auto',
       }}
     >
       {isEditing ? (
@@ -119,7 +116,6 @@ const SortableField = ({ id, text, type, index, moveField, updateField }) => {
               onChange={(e) => setFieldType(e.target.value)}
               style={{ marginBottom: "5px" }}
             >
-              {/* Populate with all possible input types */}
               <option value="text">Text</option>
               <option value="email">Email</option>
               <option value="password">Password</option>
@@ -128,13 +124,12 @@ const SortableField = ({ id, text, type, index, moveField, updateField }) => {
               <option value="date">Date</option>
               <option value="time">Time</option>
               <option value="file">File</option>
-              {/* Add more options as needed */}
             </select>
           </label>
         </div>
       ) : (
         <>
-          <label>{text}</label>
+          <label>{text} - column: {currentColumns}</label>
           <input
             type={type}
             defaultValue=""
@@ -142,6 +137,7 @@ const SortableField = ({ id, text, type, index, moveField, updateField }) => {
           />
         </>
       )}
+      
       <button onClick={handleEditToggle} style={{ marginTop: "10px" }}>
         {isEditing ? "Save" : "Edit"}
       </button>
@@ -154,7 +150,7 @@ const SortableField = ({ id, text, type, index, moveField, updateField }) => {
           right: "-5px",
           top: "0",
           cursor: "ew-resize",
-          zIndex: 10, // Ensure handle is on top but does not block drag events
+          zIndex: 10,
           backgroundColor: "#000"
         }}
       ></div>

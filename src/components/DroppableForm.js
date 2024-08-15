@@ -1,12 +1,16 @@
 import update from "immutability-helper";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useDrop } from "react-dnd";
 import SortableField from "./SortableField";
 
 const ItemType = "FORM_FIELD";
 
 const DroppableForm = ({ formFields, setFormFields, onDrop, updateField }) => {
-
+  
+  useEffect(() => {
+    console.log('DroppableForm received formFields:', formFields);
+  
+  }, [formFields]);
 
   const moveField = useCallback(
     (dragIndex, hoverIndex) => {
@@ -27,6 +31,7 @@ const DroppableForm = ({ formFields, setFormFields, onDrop, updateField }) => {
     [formFields, setFormFields]
   );
 
+
   const [, drop] = useDrop({
     accept: ItemType,
     drop: (item, monitor) => {
@@ -35,6 +40,8 @@ const DroppableForm = ({ formFields, setFormFields, onDrop, updateField }) => {
       }
     }
   });
+
+
 
   return (
     <div
@@ -53,7 +60,7 @@ const DroppableForm = ({ formFields, setFormFields, onDrop, updateField }) => {
         }
         return (
           <SortableField
-           key={field.id}
+            key={field.id}
             index={index}
             id={field.id}
             text={field.text}

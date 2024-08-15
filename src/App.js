@@ -1,17 +1,20 @@
 import React from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import "./App.css";
-import FormBuilder from "./components/FormBuilder";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+import Home from "./pages/Home";
 
 function App() {
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Home />
+    }
+  ]);
+
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="App">
-        <h1>Custom Form Builder</h1>
-        <FormBuilder />
-      </div>
-    </DndProvider>
+    <>
+      <RouterProvider router={router} />
+    </>
   );
 }
 
