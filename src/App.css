@@ -59,16 +59,16 @@ input[type="range"]::-ms-thumb {
   grid-template-columns: repeat(12, 1fr);
   gap: 10px;
 }
-.preview-form div{
+.preview-form div {
   opacity: 1;
-    border: 1px solid gray;
-    background-color: white;
-    padding: 10px;
-    box-sizing: border-box;
-    margin: 10px 0px;
-    height: min-content;
-    position: relative;
-    cursor: auto;
+  /* border: 1px solid gray; */
+  /* background-color: white; */
+  padding: 10px;
+  box-sizing: border-box;
+  margin: 10px 0px;
+  height: min-content;
+  position: relative;
+  cursor: auto;
 }
 .available-fields {
   width: 200px;

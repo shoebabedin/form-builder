@@ -1,16 +1,11 @@
 import update from "immutability-helper";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { useDrop } from "react-dnd";
 import SortableField from "./SortableField";
 
 const ItemType = "FORM_FIELD";
 
 const DroppableForm = ({ formFields, setFormFields, onDrop, updateField }) => {
-  
-  useEffect(() => {
-    console.log('DroppableForm received formFields:', formFields);
-  
-  }, [formFields]);
 
   const moveField = useCallback(
     (dragIndex, hoverIndex) => {
@@ -31,16 +26,25 @@ const DroppableForm = ({ formFields, setFormFields, onDrop, updateField }) => {
     [formFields, setFormFields]
   );
 
+  // const [, drop] = useDrop({
+  //   accept: ItemType,
+  //   drop: (item, monitor) => {
+  //     if (!monitor.didDrop()) {
+  //       onDrop(item);
+  //     }
+  //   },
+  // });
 
   const [, drop] = useDrop({
-    accept: ItemType,
-    drop: (item, monitor) => {
-      if (!monitor.didDrop()) {
-        onDrop(item);
+    accept: "FORM_FIELD",
+    drop: (item) => {
+      if (!item || !item.id || !item.text || !item.type) {
+        console.error("Dropped item is missing required properties:", item);
+        return;
       }
-    }
+      onDrop(item);
+    },
   });
-
 
 
   return (

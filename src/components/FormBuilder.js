@@ -81,23 +81,28 @@ const FormBuilder = () => {
       </div>
 
       {previewMode ? (
-        <div
-          className="preview-form"
-          
-        >
+        <div className="preview-form">
           {formFields.map((field, index) => (
-            <div key={field.id}
-            style={{
-            gridColumn: `span ${field.columns}`,
-            border: "1px solid gray",
-            padding: "10px",
-            boxSizing: "border-box",
-            margin: "10px 0",
-            height: "min-content",
-            position: "relative",
-          }}>
-              <label>{field.text}</label>
-              <input type={field.type} style={{ width: "100%" }} />
+            <div
+              key={field.id}
+              style={{
+                gridColumn: `span ${field.columns}`,
+                // border: "1px solid gray",
+                padding: "10px",
+                boxSizing: "border-box",
+                margin: "10px 0",
+                height: "min-content",
+                position: "relative"
+              }}
+            >
+              {field.type === "button" ? (
+                <button>{field.text}</button>
+              ) : (
+                <>
+                  <label>{field.text}</label>
+                  <input type={field.type} style={{ width: "100%" }} />
+                </>
+              )}
             </div>
           ))}
         </div>

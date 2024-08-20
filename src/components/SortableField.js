@@ -3,9 +3,18 @@ import { useDrag, useDrop } from "react-dnd";
 
 const ItemType = "FORM_FIELD";
 
-const SortableField = ({ id, text, type, index, moveField, updateField, columns }) => {
+const SortableField = ({
+  id,
+  text,
+  type,
+  index,
+  moveField,
+  updateField,
+  columns
+}) => {
   const ref = useRef(null);
   const [currentColumns, setCurrentColumns] = useState(columns);
+  const [currentRows, setCurrentRows] = useState(1); // Default row height
   const [isEditing, setIsEditing] = useState(false);
   const [fieldText, setFieldText] = useState(text);
   const [fieldType, setFieldType] = useState(type);
@@ -36,6 +45,17 @@ const SortableField = ({ id, text, type, index, moveField, updateField, columns 
 
   drag(drop(ref));
 
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+    if (isEditing) {
+      // Save changes when exiting edit mode
+      updateField(id, {
+        text: fieldText,
+        type: fieldType,
+        columns: currentColumns
+      });
+    }
+  };
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -74,14 +94,6 @@ const SortableField = ({ id, text, type, index, moveField, updateField, columns 
     };
   }, [id, updateField]);
 
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing);
-    if (isEditing) {
-      // Save changes when exiting edit mode
-      updateField(id, { text: fieldText, type: fieldType, columns: currentColumns });
-    }
-  };
-
   return (
     <div
       ref={ref}
@@ -89,13 +101,13 @@ const SortableField = ({ id, text, type, index, moveField, updateField, columns 
         opacity: isDragging ? 0.5 : 1,
         gridColumn: `span ${currentColumns}`,
         border: "1px solid gray",
-        backgroundColor: isOver ? 'red' : 'white',
+        backgroundColor: isOver ? "red" : "white",
         padding: "10px",
         boxSizing: "border-box",
         margin: "10px 0",
         height: "min-content",
         position: "relative",
-        cursor: isOver ? 'no-drop' : 'auto',
+        cursor: isOver ? "no-drop" : "auto"
       }}
     >
       {isEditing ? (
@@ -106,7 +118,7 @@ const SortableField = ({ id, text, type, index, moveField, updateField, columns 
               type="text"
               value={fieldText}
               onChange={(e) => setFieldText(e.target.value)}
-              style={{ marginBottom: "5px" }}
+              style={{ width: "100%", marginBottom: "5px" }}
             />
           </label>
           <label>
@@ -114,7 +126,7 @@ const SortableField = ({ id, text, type, index, moveField, updateField, columns 
             <select
               value={fieldType}
               onChange={(e) => setFieldType(e.target.value)}
-              style={{ marginBottom: "5px" }}
+              style={{ width: "100%", marginBottom: "5px" }}
             >
               <option value="text">Text</option>
               <option value="email">Email</option>
@@ -129,15 +141,21 @@ const SortableField = ({ id, text, type, index, moveField, updateField, columns 
         </div>
       ) : (
         <>
-          <label>{text} - column: {currentColumns}</label>
-          <input
-            type={type}
-            defaultValue=""
-            style={{ width: "100%", marginBottom: "10px" }}
-          />
+          <label>
+            {text} - column: {currentColumns}
+          </label>
+          {type === "button" ? (
+            <button>{text}</button>
+          ) : (
+            <input
+              type={type}
+              defaultValue=""
+              style={{ width: "100%", marginBottom: "10px" }}
+            />
+          )}
         </>
       )}
-      
+
       <button onClick={handleEditToggle} style={{ marginTop: "10px" }}>
         {isEditing ? "Save" : "Edit"}
       </button>
